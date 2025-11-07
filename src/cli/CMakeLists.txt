@@ -1,3 +1,0 @@
-add_executable(algorithmic_trading_cli main.cpp CommandHandler.cpp)
-target_include_directories(algorithmic_trading_cli PRIVATE ${PROJECT_SOURCE_DIR}/include)
-target_link_libraries(algorithmic_trading_cli PRIVATE data)
