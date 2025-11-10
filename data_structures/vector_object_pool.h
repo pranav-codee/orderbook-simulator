@@ -5,6 +5,7 @@
 #include <mutex>
 #include <new>
 #include <unordered_set>
+using namespace std;
 
 template<typename T>
 class VectorObjectPool {
@@ -14,7 +15,7 @@ public:
     }
 
     ~VectorObjectPool() {
-        std::lock_guard<std::mutex> lk(lock);
+        lock_guard<mutex> lk(lock);
 
         for (void* p : active) {
             T* t = (T*)p;
@@ -32,7 +33,7 @@ public:
 
     template<typename... Args>
     T* create(Args&&... args) {
-        std::lock_guard<std::mutex> lk(lock);
+        lock_guard<mutex> lk(lock);
 
         if (freeList.empty()) {
             size_t grow = (capacity == 0 ? 1 : capacity / 2);
@@ -43,7 +44,7 @@ public:
         void* mem = freeList.back();
         freeList.pop_back();
 
-        T* obj = new(mem) T(std::forward<Args>(args)...);
+        T* obj = new(mem) T(forward<Args>(args)...);
         active.insert(mem);
         ++usedCount;
 
@@ -57,7 +58,7 @@ public:
 
         void* rawPtr = (void*)obj;
 
-        std::lock_guard<std::mutex> lk(lock);
+        lock_guard<mutex> lk(lock);
 
         auto it = active.find(rawPtr);
         if (it != active.end()) {
@@ -80,12 +81,12 @@ private:
         capacity += n;
     }
 
-    std::vector<void*> freeList;
-    std::vector<void*> blocks;
-    std::unordered_set<void*> active;
+    vector<void*> freeList;
+    vector<void*> blocks;
+    unordered_set<void*> active;
 
     size_t capacity = 0;
     size_t usedCount = 0;
 
-    std::mutex lock;
+    mutex lock;
 };
